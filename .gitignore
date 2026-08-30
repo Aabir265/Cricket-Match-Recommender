@@ -1,0 +1,9 @@
+data/raw/
+*.zip
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+.envdata/raw/all_json.zip
+data/raw/all_json.zip
