@@ -1,241 +1,216 @@
-🏏 Cricket Match Recommender
+# 🏏 India Cricket Match Recommendation System
 
-A content-based recommendation system that recommends **must-watch India cricket matches** based on what a viewer is interested in.
+Find the **must-watch India cricket matches** based on a viewer's preferences using **Content-Based Recommendation** and **Cosine Similarity**.
 
-The idea behind this project is simple:
-
-&gt; There are hundreds of India matches from the past. If someone wants to watch highlights but doesn't know which match to pick, why not recommend one based on what they like?
-
-For example, a viewer might prefer:
-
-- Intense matches
-- Test cricket
-- Classic Indian cricket
-- Matches involving Sachin Tendulkar or Rahul Dravid
-- Certain opponents
-- Older or more recent matches
-
-The system converts these preferences into numerical feature vectors and uses **cosine similarity** to find matches that are most similar to the viewer's preferences.
+This project uses historical India international cricket match data from **2001 to the present** and recommends matches based on factors such as match intensity, importance, opponent excitement, format, player presence, and recency.
 
 ---
 
-## 📊 Dataset
+## 📌 Project Overview
 
-The current dataset contains:
+There are hundreds of India cricket matches played over the years.
 
-- **1,020 India international matches**
+Sometimes you may want to revisit an old match, but searching through hundreds of matches to find something worth watching can be difficult.
+
+This project aims to solve that problem by building a recommendation system that understands what a viewer prefers and finds matches with similar characteristics.
+
+For example, a viewer might prefer:
+
+- 🔥 Intense matches
+- 🏆 Important matches
+- 🏏 Test / ODI / T20I
+- 👤 Matches featuring specific players
+- ⚔️ Matches against exciting opponents
+- 🕐 Older or more recent matches
+
+The system converts these characteristics into numerical features and uses **Cosine Similarity** to rank matches according to the user's preferences.
+
+---
+
+## 🚀 Features
+
+- 📊 Historical India cricket match dataset
+- 🧹 Data preparation and preprocessing
+- 🧠 Feature Engineering
+- 🔥 Match intensity calculation
+- 🏆 Match importance calculation
+- ⚔️ Opponent excitement / rivalry calculation
+- 🏏 Cricket format encoding
+- 👤 Player-specific features
+- 🕐 Recency calculation
+- 📐 Feature vector creation
+- 🤖 Content-Based Recommendation
+- 🔢 Cosine Similarity
+- 📈 Ranking of recommended matches
+- 🎯 Personalized match recommendations
+
+---
+
+## 🛠️ Technologies Used
+
+- Python
+- Pandas
+- NumPy
+- Scikit-learn
+- Cosine Similarity
+
+---
+
+## 📂 Dataset
+
+**Dataset:** India Men's International Cricket Matches
+
+**Source:** [Cricsheet](https://cricsheet.org/)
+
+The dataset currently contains:
+
+- **1,020 India men's international matches**
 - **526 ODIs**
 - **276 T20Is**
 - **218 Tests**
-- Matches spanning **2001–2026**
-- 15 different opponents
+- Matches spanning approximately **2001–2026**
 
-The dataset currently covers matches from:
+The dataset includes information such as:
+
+- Match ID
+- Date
+- Year
+- Format
+- Opponent
+- Competition
+- Match Stage
+- Venue
+- City
+- Result
+- Winning Margin
+- Player of the Match
+- India's Playing XI
+
+The raw Cricsheet archive is not included in the repository because of its large file size. It can be downloaded and processed using the provided preparation script.
+
+---
+
+## ⚙️ Machine Learning / Recommendation Workflow
+
+### 1. Data Preparation
+
+Historical India international cricket match data is downloaded from Cricsheet.
+
+The dataset is filtered to include:
+
+- India men's matches
+- International matches
+- Matches from 2001 onwards
+- Test, ODI and T20I formats
+
+The processed data is stored in:
 
 ```text
-2001-12-19 → 2026-08-15
-The raw dataset is prepared before being used by the recommendation system.
-The large raw dataset is intentionally not stored in this repository because of its file size.
+data/matches.csv
+2. Feature Engineering
 
-🧠 Feature Engineering
-Each match is represented using numerical features.
-🔥 Match Intensity
-A match is considered intense when the winning margin is relatively small.
+New numerical features are created from the match data so that the recommendation system can work with the information mathematically.
+
+Match Intensity
+
+A match is classified as intense when the winning margin is relatively small.
+
 Current rules:
-Win by wickets → margin &lt; 5 wickets
-Win by runs    → margin &lt; 25 runs
-This produces a binary feature:
+
+Win by wickets → margin < 5 wickets
+Win by runs    → margin < 25 runs
+
+This produces:
+
 1 → Intense
-0 → Not intense
-The current dataset contains:
-204 intense matches
-816 non-intense matches
+0 → Not Intense
+Match Importance
 
-🏆 Match Importance
-A match receives an importance score based on whether it was:
-
+A match is considered important when it was:
 
 A Final
-
-
 A Semi Final
+Played at selected historically significant cricket venues
 
+This produces:
 
-Played at selected historically significant venues
-
-
-The feature is represented as:
 1 → Important
-0 → Not important
-The current dataset contains:
-124 important matches
-896 non-important matches
+0 → Not Important
+Opponent Excitement / Rivalry
 
+Opponent excitement is derived from the historical data rather than manually assigning arbitrary values.
 
+The system calculates the percentage of matches against each opponent that were classified as intense.
 
-          
-            
-          
-        
-  
-        
-    
-
-⚔️ Opponent Excitement / Rivalry
-Instead of manually assigning a rivalry score to every opponent, the current system derives it from the dataset.
-The score is based on the percentage of India's matches against an opponent that were classified as intense.
 For example:
-Opponent → Intense Match Rate
 
-West Indies → 23.93%
-Ireland     → 23.08%
-Zimbabwe    → 22.50%
-Australia   → 22.22%
-England     → 21.19%
-South Africa → 20.34%
-Pakistan    → 18.84%
-New Zealand → 18.02%
-Sri Lanka   → 16.67%
-Bangladesh  → 16.39%
-Opponents with very few matches are excluded from the calculation to avoid unreliable percentages caused by small sample sizes.
+Opponent        Intense Match Rate
 
-🏏 Match Format
-The format is converted into numerical features:
+Australia       ...
+England         ...
+Pakistan        ...
+South Africa    ...
+
+Opponents with fewer than 10 matches are excluded from the calculation to reduce the effect of very small sample sizes.
+
+Match Format
+
+The match format is converted into separate numerical features.
+
 odi_format
 t20_format
 test_format
-For example:
+
+Example:
+
 Test → 0 0 1
 ODI  → 1 0 0
 T20I → 0 1 0
-This avoids treating formats as ordered numerical values.
 
-👤 Player Features
-The system also considers whether selected players were part of India's playing XI.
+This avoids treating the formats as ordered numerical values.
+
+Player Features
+
+Selected Indian players are represented using binary features based on whether they were part of India's playing XI.
+
 Current player features include:
 
-
 Sachin Tendulkar
-
-
 Rahul Dravid
-
-
 Virender Sehwag
-
-
 MS Dhoni
-
-
 Virat Kohli
-
-
 Rohit Sharma
-
-
 Jasprit Bumrah
-
-
 Harbhajan Singh
 
+Example:
 
-Each player feature is represented as:
 1 → Player played
 0 → Player did not play
-This allows the recommender to handle preferences such as:
 
-"Show me classic India matches where Sachin played."
+This allows the recommendation system to handle preferences such as:
 
+"I want classic India matches where Sachin played."
+Recency
 
-
-
-          
-            
-          
-        
-  
-        
-    
-
-🕐 Recency
 The match year is normalized between 0 and 1.
-Older matches receive values closer to 0, while newer matches receive values closer to 1.
-This allows the recommendation system to consider a viewer's preference for older or newer matches without treating newer matches as automatically better.
 
-🤖 Recommendation Algorithm
-The current recommendation approach is content-based filtering.
-Each match is represented as a vector of numerical features.
-For example:
-Match A:
+Older match → closer to 0
+Recent match → closer to 1
 
-[intense,
- importance,
- rivalry,
- format,
- players,
- recency,
- ...]
-A user's preferences are represented using a vector with the same features.
-The system then calculates the cosine similarity between the user preference vector and every match vector.
-Conceptually:
-User Preference
-       ↓
-[ 1, 0, 0.22, 0, 0, 1, ... ]
-       ↓
-Cosine Similarity
-       ↓
-────────────────────────
-Match 1 → 0.766
-Match 2 → 0.693
-Match 3 → 0.690
-Match 4 → 0.687
-...
-────────────────────────
-       ↓
-Ranked Recommendations
-A higher similarity score means the match is more similar to the user's preferences.
-The current system compares the user preference vector against all 1,020 matches and ranks them according to their similarity scores.
+This allows the recommendation system to account for a viewer's preference for older or newer cricket matches.
 
-🧪 Example
-One test preference profile was created around:
-Intense       → Yes
-Test cricket  → Yes
-Sachin        → Yes
-Dravid        → Yes
-Harbhajan     → Yes
-Classic era   → Preferred
-One of the highest-ranked recommendations was:
-India vs Australia
-3 November 2004
-Test
-Wankhede Stadium
-The match was recommended with a cosine similarity score of approximately:
-0.766
-The recommendation made sense because the match:
+3. Feature Matrix
 
+After feature engineering, the selected features are combined into a feature matrix.
 
-Was a Test
+The current feature matrix contains:
 
+1,020 matches × 15 features
 
-Was classified as intense
+Current features include:
 
-
-Featured Sachin Tendulkar
-
-
-Featured Rahul Dravid
-
-
-Featured Virender Sehwag
-
-
-Was from the older era of Indian cricket
-
-
-This was one of the first tests of whether the recommendation logic was producing sensible results.
-
-📈 Current Feature Matrix
-The current system uses 15 numerical features for every match.
 intense
 importance
 rivalry
@@ -254,16 +229,13 @@ bumrah
 harbhajan
 
 recency
-The resulting feature matrix has the shape:
-(1020, 15)
-Meaning:
-1,020 matches × 15 features
-Missing rivalry values are currently handled by filling them with 0 before calculating cosine similarity.
+4. User Preference Vector
 
-🔢 User Preference Vector
-A user preference is represented using the same 15 features as the match vectors.
-For example:
-{
+A user's preferences are represented using the same features as the match vectors.
+
+Example:
+
+user_preferences = {
     "intense": 1,
     "importance": 0,
     "rivalry": 1,
@@ -280,26 +252,93 @@ For example:
     "harbhajan": 1,
     "recency": 0
 }
-The preference vector is then compared against every match vector using cosine similarity.
 
-🛠️ Tech Stack
+The dictionary is converted into a numerical user vector using the same feature order as the match feature matrix.
 
+5. Cosine Similarity
 
-Python — core programming language
+The recommendation system uses Cosine Similarity to compare the user's preference vector with every match vector.
 
+Conceptually:
 
-Pandas — data manipulation and preparation
+User Preferences
+       ↓
+User Feature Vector
+       ↓
+Cosine Similarity
+       ↓
+Compare with 1,020 Match Vectors
+       ↓
+Similarity Scores
+       ↓
+Sort Scores
+       ↓
+Recommended Matches
 
+A higher similarity score means that the match is more aligned with the user's selected preferences.
 
-NumPy — numerical operations and vectors
+6. Recommendation
 
+The similarity scores are added to the dataset and the matches are sorted in descending order.
 
-Scikit-learn — cosine similarity
+Example:
 
+Match                         Similarity
 
-Cricket match data — historical India international matches
+India vs Australia (2004)       0.766
+India vs Australia (2010)       0.693
+India vs England (2011)        0.690
+India vs Sri Lanka (2009)      0.687
+India vs Australia (2003)      0.653
 
+The highest-scoring matches become the recommendations.
 
+🧪 Example Recommendation
+
+A test preference profile was created around:
+
+Intense       → Yes
+Test cricket  → Yes
+Sachin        → Yes
+Dravid        → Yes
+Harbhajan     → Yes
+Classic era   → Preferred
+
+One of the highest-ranked recommendations was:
+
+India vs Australia
+3 November 2004
+Test
+Wankhede Stadium
+
+The match received a similarity score of approximately:
+
+0.766
+
+The recommendation was relevant to the selected preferences because:
+
+It was a Test match
+It was classified as intense
+Sachin Tendulkar played
+Rahul Dravid played
+Virender Sehwag played
+It was from the classic era
+
+This served as an early validation of the recommendation logic.
+
+📊 Recommendation Approach
+
+This project currently uses Content-Based Filtering.
+
+The system does not rely on historical user ratings or collaborative filtering.
+
+Instead, it recommends matches based on the similarity between:
+
+User Preferences
+        ↕
+Match Characteristics
+
+This approach is suitable for the initial version because there is not yet enough user interaction data to build a collaborative filtering system.
 
 📁 Project Structure
 cricket-highlights-recommender/
@@ -312,116 +351,90 @@ cricket-highlights-recommender/
 │
 └── data/
     └── matches.csv
-The raw dataset is kept locally and is not committed to GitHub because of its large file size.
 
-🚀 Getting Started
-1. Clone the repository
+The raw Cricsheet archive is kept locally and excluded from GitHub because of its large size.
+
+▶️ How to Run
+Clone the repository
 git clone https://github.com/Aabir265/Cricket-Match-Recommender.git
+Move into the project directory
 cd Cricket-Match-Recommender
-2. Install dependencies
+Install dependencies
 pip install -r requirements.txt
-3. Prepare the dataset
+Prepare the dataset
 python download_and_prepare.py
-4. Run the recommender
+Run the recommendation system
 python main.py
-
 🔮 Future Improvements
-This project is still a work in progress.
-Planned improvements include:
+Build an interactive user preference interface
+Allow users to select favourite players
+Allow users to select preferred cricket format
+Add an era / classic cricket preference
+Improve the opponent excitement calculation
+Add more match-specific features
+Include batting and bowling performances
+Detect close chases
+Detect memorable finishes
+Identify Super Overs and dramatic endings
+Add available match highlights links
+Build an interactive web application
+Improve recommendation explanations
+Introduce feature weighting
+Collect real user feedback
+Experiment with hybrid recommendation systems
+Explore collaborative filtering once sufficient user interaction data is available
+🧠 What I Learned
 
+Through this project, I gained practical experience with:
 
- Build an interactive user preference system
+Data collection and preparation
+Pandas DataFrames
+Data preprocessing
+Feature Engineering
+Creating numerical features from raw data
+Working with categorical data
+One-hot style encoding
+Building feature vectors
+Content-Based Recommendation
+Cosine Similarity
+Ranking recommendations
+Handling missing values
+Thinking about recommendation quality and user preferences
+Building an end-to-end recommendation workflow using Python and Scikit-learn
 
-
- Allow users to select their favourite players
-
-
- Allow users to select a preferred cricket format
-
-
- Add an era/classic-cricket preference
-
-
- Improve the rivalry/excitement calculation
-
-
- Add more match-specific features
-
-
- Include batting and bowling performances
-
-
- Detect memorable finishes and close chases
-
-
- Add links to available match highlights
-
-
- Build a simple web interface
-
-
- Improve personalization
-
-
- Experiment with feature weighting
-
-
- Evaluate recommendation quality with real user feedback
-
-
+One of the most valuable parts of the project was learning Feature Engineering for the first time and designing the features based on the characteristics of the actual cricket dataset rather than simply applying a pre-built model.
 
 📌 Current Status
+
 Work in Progress 🚧
-The core data preparation, feature engineering and first version of the cosine-similarity recommendation system are working.
-Currently, the system can:
-✓ Prepare historical India match data
-✓ Engineer numerical match features
-✓ Create a feature matrix
-✓ Create a user preference vector
-✓ Calculate cosine similarity
-✓ Rank matches based on similarity
-The next stage is to make the recommendation system more personalized and eventually turn it into an interactive application.
 
-🎯 Project Motivation
-This project started from a simple question:
+The current version successfully performs:
 
-"I want to watch an India cricket match from the past. Which one should I watch?"
+✓ Data collection
+✓ Data preparation
+✓ Feature Engineering
+✓ Feature matrix creation
+✓ User preference vector creation
+✓ Cosine Similarity
+✓ Match ranking
+✓ Basic personalized recommendations
 
-There are hundreds of matches to choose from, and different viewers may have completely different preferences.
-Someone might want:
+The next stage is to improve the recommendation logic and make the system interactive so users can choose their preferred:
 
-"Give me an intense India vs Australia Test."
+Era
+Format
+Players
+Intensity
+Opponents
 
-Another person might want:
+and receive a personalized list of India cricket matches worth watching.
 
-"Show me a classic Sachin Tendulkar match."
+📜 License
 
-Someone else might prefer:
-
-"Give me a recent high-pressure T20I."
-
-The goal is to eventually make the recommendation system flexible enough to understand these different preferences.
+This project is intended for educational, experimental, and portfolio purposes.
 
 👨‍💻 Author
+
 Aabir Sharma
-Built as a project to explore:
 
-
-Machine Learning
-
-
-Recommendation Systems
-
-
-Feature Engineering
-
-
-Data Analysis
-
-
-Sports Analytics
-
-
-
-⭐ If you find the project interesting, feel free to explore the code or suggest improvements.
-Built with Python, cricket, and a lot of curiosity. 🏏
+Computer Engineering Student | AI & Machine Learning Enthusiast
